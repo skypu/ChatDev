@@ -49,6 +49,7 @@ python run.py --org "MyGreateCompany" --name "MyFirstProject" --task "I'd like t
 
 ## 📖 about code changes
 model_backend.py:line 69; because the tiktoken module is designed for openai, deepseek models encoding methods are not included, so i set it to "cl100k_base"
+to use local ollama, i modified the model_backend, added a func call_ai, a class to handel the ollama response:OllamaChatCompletion
 in other files i just commented all the gpt stuffs.
 
 if you have any problems, feel free to talk with me.
