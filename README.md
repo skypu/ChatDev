@@ -33,6 +33,13 @@ $env:OPENAI_API_KEY="your_openai_api_key"
 $env:BASE_URL="https://ark.cn-beijing.volces.com/api/v3"
 $env:DEFAULT_AI_MODEL="deepseek-r1-250120"
 ```
+alternatively, you could just use your local ollama
+```
+$env:OPENAI_API_KEY="anything, ollama need no key"
+$env:BASE_URL="[https://ark.cn-beijing.volces.com/api/v3](http://localhost:11434)"
+$env:DEFAULT_AI_MODEL="gemma3:latest"
+```
+thus you never need to worry about the bill
 
 5.just python and enjoy it
 ```
