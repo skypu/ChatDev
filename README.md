@@ -32,6 +32,14 @@ pip install -r requirements.txt
 $env:OPENAI_API_KEY="your_openai_api_key"
 $env:BASE_URL="https://ark.cn-beijing.volces.com/api/v3"
 $env:DEFAULT_AI_MODEL="deepseek-r1-250120"
+$env:AI_PROVIDER="openai"
+```
+alternatively, you could just use your local ollama with any model you've installed, all calls are free
+```
+$env:OPENAI_API_KEY="not needed"
+$env:BASE_URL="http://localhost:11434/api/generate"
+$env:DEFAULT_AI_MODEL="gemma3:latest"
+$env:AI_PROVIDER="ollama"
 ```
 
 5.just python and enjoy it
@@ -41,6 +49,7 @@ python run.py --org "MyGreateCompany" --name "MyFirstProject" --task "I'd like t
 
 ## 📖 about code changes
 model_backend.py:line 69; because the tiktoken module is designed for openai, deepseek models encoding methods are not included, so i set it to "cl100k_base"
+to use local ollama, i modified the model_backend, added a func call_ai, a class to handel the ollama response:OllamaChatCompletion
 in other files i just commented all the gpt stuffs.
 
 if you have any problems, feel free to talk with me.
