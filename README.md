@@ -32,14 +32,15 @@ pip install -r requirements.txt
 $env:OPENAI_API_KEY="your_openai_api_key"
 $env:BASE_URL="https://ark.cn-beijing.volces.com/api/v3"
 $env:DEFAULT_AI_MODEL="deepseek-r1-250120"
+$env:AI_PROVIDER="openai"
 ```
-alternatively, you could just use your local ollama
+alternatively, you could just use your local ollama with any model you've installed, all calls are free
 ```
-$env:OPENAI_API_KEY="anything, ollama need no key"
+$env:OPENAI_API_KEY="not needed"
 $env:BASE_URL="http://localhost:11434"
 $env:DEFAULT_AI_MODEL="gemma3:latest"
+$env:AI_PROVIDER="ollama"
 ```
-thus you never need to worry about the bill
 
 5.just python and enjoy it
 ```
