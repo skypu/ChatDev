@@ -37,7 +37,7 @@ $env:AI_PROVIDER="openai"
 alternatively, you could just use your local ollama with any model you've installed, all calls are free
 ```
 $env:OPENAI_API_KEY="not needed"
-$env:BASE_URL="http://localhost:11434"
+$env:BASE_URL="http://localhost:11434/api/generate"
 $env:DEFAULT_AI_MODEL="gemma3:latest"
 $env:AI_PROVIDER="ollama"
 ```
