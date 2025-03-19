@@ -116,20 +116,23 @@ class OpenAIModel(ModelBackend):
                 # print(call_ai(model=DEFAULT_AI_MODEL, messages=[{"role": "user", "content": "Hello!"}]))
                 response = call_ollama(*args, **kwargs)
 
+            num_prompt_tokens = response.usage.prompt_tokens
+            num_completion_tokens = response.usage.completion_tokens
+
             cost = prompt_cost(
                 self.model_type.value,
-                # num_prompt_tokens=response.usage.prompt_tokens,
-                num_prompt_tokens=response.get("usage", {}).get("prompt_tokens", 1),
-                # num_completion_tokens=response.usage.completion_tokens
-                num_completion_tokens=response.get("usage", {}).get("completion_tokens", 2)
+                num_prompt_tokens=num_prompt_tokens,
+                # num_prompt_tokens=response.get("usage", {}).get("prompt_tokens", 1),
+                num_completion_tokens=num_completion_tokens
+                # num_completion_tokens=response.get("usage", {}).get("completion_tokens", 2)
             )
 
             log_visualize(
                 "**[{} Usage_Info Receive]**\nprompt_tokens: {}\ncompletion_tokens: {}\ntotal_tokens: {}\ncost: ${:.6f}\n".format(
                     BASE_URL,
-                    response.get("usage", {}).get("prompt_tokens", 1),
-                    response.get("usage", {}).get("completion_tokens", 2),
-                    response.get("usage", {}).get("total_tokens", 3), cost))
+                    num_prompt_tokens,
+                    num_completion_tokens,
+                    num_prompt_tokens + num_completion_tokens, cost))
             if not isinstance(response, ChatCompletion):
                 raise RuntimeError("Unexpected return from OpenAI API")
             return response
