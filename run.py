@@ -69,10 +69,27 @@ def get_config(company):
     return tuple(config_paths)
 
 print(f"""
+################################################################
+################################################################
+################################################################
+################################################################
 You should have done such things before running this script:
+
+if you're using online OpenAI API, you should have set your OpenAI API key in the environment variable.
 $env:OPENAI_API_KEY="your_openai_api_key"
 $env:BASE_URL="https://ark.cn-beijing.volces.com/api/v3"
 $env:DEFAULT_AI_MODEL="deepseek-r1-250120"
+$env:AI_PROVIDER="openai"
+################################################################
+if you're using your local model, you should have set your local model in the environment variable.
+$env:OPENAI_API_KEY="not needed"
+$env:BASE_URL="http://localhost:11434/api/generate"
+$env:DEFAULT_AI_MODEL="gemma3:latest"
+$env:AI_PROVIDER="ollama"
+################################################################
+################################################################
+################################################################
+################################################################
 """)
 
 parser = argparse.ArgumentParser(description='argparse')

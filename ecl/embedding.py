@@ -44,8 +44,8 @@ class OpenAIEmbedding:
             response = client.embeddings.create(input = text, model="text-embedding-ada-002").model_dump()
             embedding = response['data'][0]['embedding']
             log_and_print_online(
-            "Get text embedding from {}:\n**[OpenAI_Usage_Info Receive]**\nprompt_tokens: {}\ntotal_tokens: {}\n".format(
-                response["model"],response["usage"]["prompt_tokens"],response["usage"]["total_tokens"]))
+            "Get text embedding from {}:\n**[{} Usage_Info Receive]**\nprompt_tokens: {}\ntotal_tokens: {}\n".format(
+                response["model"],BASE_URL,response["usage"]["prompt_tokens"],response["usage"]["total_tokens"]))
             self.text_prompt_tokens += response["usage"]["prompt_tokens"]
             self.text_total_tokens += response["usage"]["total_tokens"]
             self.prompt_tokens += response["usage"]["prompt_tokens"]
@@ -71,8 +71,8 @@ class OpenAIEmbedding:
             response = client.embeddings.create(input=code, model="text-embedding-ada-002").model_dump()
             embedding = response['data'][0]['embedding']
             log_and_print_online(
-            "Get code embedding from {}:\n**[OpenAI_Usage_Info Receive]**\nprompt_tokens: {}\ntotal_tokens: {}\n".format(
-                response["model"],response["usage"]["prompt_tokens"],response["usage"]["total_tokens"]))
+            "Get code embedding from {}:\n**[{} Usage_Info Receive]**\nprompt_tokens: {}\ntotal_tokens: {}\n".format(
+                response["model"],BASE_URL, response["usage"]["prompt_tokens"],response["usage"]["total_tokens"]))
             
             self.code_prompt_tokens += response["usage"]["prompt_tokens"]
             self.code_total_tokens += response["usage"]["total_tokens"]
