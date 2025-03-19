@@ -1,39 +1,44 @@
 import os
 
 import numpy as np
-
+DEFAULT_AI_MODEL = os.environ.get('DEFAULT_AI_MODEL')
+if not DEFAULT_AI_MODEL:
+    DEFAULT_AI_MODEL = "deepseek-r1-250120"
 
 def prompt_cost(model_type: str, num_prompt_tokens: float, num_completion_tokens: float):
     input_cost_map = {
-        "gpt-3.5-turbo": 0.0005,
-        "gpt-3.5-turbo-16k": 0.003,
-        "gpt-3.5-turbo-0613": 0.0015,
-        "gpt-3.5-turbo-16k-0613": 0.003,
-        "gpt-4": 0.03,
-        "gpt-4-0613": 0.03,
-        "gpt-4-32k": 0.06,
-        "gpt-4-turbo": 0.01,
-        "gpt-4o": 0.005,
-        "gpt-4o-mini": 0.00015,
+        # "gpt-3.5-turbo": 0.0005,
+        # "gpt-3.5-turbo-16k": 0.003,
+        # "gpt-3.5-turbo-0613": 0.0015,
+        # "gpt-3.5-turbo-16k-0613": 0.003,
+        # "gpt-4": 0.03,
+        # "gpt-4-0613": 0.03,
+        # "gpt-4-32k": 0.06,
+        # "gpt-4-turbo": 0.01,
+        # "gpt-4o": 0.005,
+        # "gpt-4o-mini": 0.00015,
+        "deepseek-r1-250120": 0.002,
     }
 
     output_cost_map = {
-        "gpt-3.5-turbo": 0.0015,
-        "gpt-3.5-turbo-16k": 0.004,
-        "gpt-3.5-turbo-0613": 0.002,
-        "gpt-3.5-turbo-16k-0613": 0.004,
-        "gpt-4": 0.06,
-        "gpt-4-0613": 0.06,
-        "gpt-4-32k": 0.12,
-        "gpt-4-turbo": 0.03,
-        "gpt-4o": 0.015,
-        "gpt-4o-mini": 0.0006,
+        # "gpt-3.5-turbo": 0.0015,
+        # "gpt-3.5-turbo-16k": 0.004,
+        # "gpt-3.5-turbo-0613": 0.002,
+        # "gpt-3.5-turbo-16k-0613": 0.004,
+        # "gpt-4": 0.06,
+        # "gpt-4-0613": 0.06,
+        # "gpt-4-32k": 0.12,
+        # "gpt-4-turbo": 0.03,
+        # "gpt-4o": 0.015,
+        # "gpt-4o-mini": 0.0006,
+        "deepseek-r1-250120": 0.008,
     }
 
     if model_type not in input_cost_map or model_type not in output_cost_map:
         return -1
 
-    return num_prompt_tokens * input_cost_map[model_type] / 1000.0 + num_completion_tokens * output_cost_map[model_type] / 1000.0
+    return num_prompt_tokens * input_cost_map[model_type] / 1000.0 + num_completion_tokens * output_cost_map[
+        model_type] / 1000.0
 
 
 def get_info(dir, log_filepath):
@@ -107,19 +112,21 @@ def get_info(dir, log_filepath):
         if len(sublines) > 0:
             model_type = sublines[0].split("| **model_type** | ModelType.")[-1].split(" | ")[0]
             model_type = model_type[:-2]
-            if model_type == "GPT_3_5_TURBO" or model_type == "GPT_3_5_TURBO_NEW":
-                model_type = "gpt-3.5-turbo"
-            elif model_type == "GPT_4":
-                model_type = "gpt-4"
-            elif model_type == "GPT_4_32k":
-                model_type = "gpt-4-32k"
-            elif model_type == "GPT_4_TURBO":
-                model_type = "gpt-4-turbo"
-            elif model_type == "GPT_4O":
-                model_type = "gpt-4o"
-            elif model_type == "GPT_4O_MINI":
-                model_type = "gpt-4o-mini"
-            # print("model_type:", model_type)
+            # if model_type == "GPT_3_5_TURBO" or model_type == "GPT_3_5_TURBO_NEW":
+            #     model_type = "gpt-3.5-turbo"
+            # elif model_type == "GPT_4":
+            #     model_type = "gpt-4"
+            # elif model_type == "GPT_4_32k":
+            #     model_type = "gpt-4-32k"
+            # elif model_type == "GPT_4_TURBO":
+            #     model_type = "gpt-4-turbo"
+            # elif model_type == "GPT_4O":
+            #     model_type = "gpt-4o"
+            # elif model_type == "GPT_4O_MINI":
+            #     model_type = "gpt-4o-mini"
+            if model_type == "DEFAULT_MODEL":
+                model_type = DEFAULT_AI_MODEL
+            print("model_type:", model_type)
 
         lines = open(log_filepath, "r", encoding="utf8").read().split("\n")
         start_lines = [line for line in lines if "**[Start Chat]**" in line]

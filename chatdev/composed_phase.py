@@ -19,7 +19,7 @@ class ComposedPhase(ABC):
                  composition: list = None,
                  config_phase: dict = None,
                  config_role: dict = None,
-                 model_type: ModelType = ModelType.GPT_3_5_TURBO,
+                 model_type: ModelType = ModelType.DEFAULT_MODEL,
                  log_filepath: str = ""
                  ):
         """

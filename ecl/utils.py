@@ -1,26 +1,30 @@
-import subprocess
 import json
-import yaml
-import time
 import logging
-from easydict import EasyDict
-import openai
-from openai import OpenAI
-import numpy as np
 import os
+import subprocess
+import time
 from abc import ABC, abstractmethod
-import tiktoken
 from typing import Any, Dict
+
+import openai
+import tiktoken
+import yaml
+from easydict import EasyDict
 from tenacity import (
     retry,
     stop_after_attempt,
     wait_exponential
 )
+
 OPENAI_API_KEY = os.environ['OPENAI_API_KEY']
 if 'BASE_URL' in os.environ:
     BASE_URL = os.environ['BASE_URL']
 else:
     BASE_URL = None
+DEFAULT_AI_MODEL = os.environ.get('DEFAULT_AI_MODEL')
+if not DEFAULT_AI_MODEL:
+    DEFAULT_AI_MODEL = "deepseek-r1-250120"
+
 
 def getFilesFromType(sourceDir, filetype):
     files = []
@@ -30,10 +34,12 @@ def getFilesFromType(sourceDir, filetype):
                 files.append(os.path.join(root, filename))
     return files
 
+
 def cmd(command: str):
     print(">> {}".format(command))
     text = subprocess.run(command, shell=True, text=True, stdout=subprocess.PIPE).stdout
     return text
+
 
 def get_easyDict_from_filepath(path: str):
     # print(path)
@@ -65,8 +71,8 @@ def calc_max_token(messages, model):
         "gpt-4": 8192,
         "gpt-4-0613": 8192,
         "gpt-4-32k": 32768,
-        "gpt-4o": 4096, #100000
-        "gpt-4o-mini": 16384, #100000
+        "gpt-4o": 4096,  # 100000
+        "gpt-4o-mini": 16384,  # 100000
     }
     num_max_token = num_max_token_map[model]
     num_max_completion_tokens = num_max_token - num_prompt_tokens
@@ -90,28 +96,29 @@ class ModelBackend(ABC):
         """
         pass
 
+
 class OpenAIModel(ModelBackend):
     r"""OpenAI API in a unified ModelBackend interface."""
 
-    def __init__(self, model_type, model_config_dict: Dict=None) -> None:
+    def __init__(self, model_type=DEFAULT_AI_MODEL, model_config_dict: Dict = None) -> None:
         super().__init__()
         self.model_type = model_type
         self.model_config_dict = model_config_dict
         if self.model_config_dict == None:
             self.model_config_dict = {"temperature": 0.2,
-                                "top_p": 1.0,
-                                "n": 1,
-                                "stream": False,
-                                "frequency_penalty": 0.0,
-                                "presence_penalty": 0.0,
-                                "logit_bias": {},
-                                }
+                                      "top_p": 1.0,
+                                      "n": 1,
+                                      "stream": False,
+                                      "frequency_penalty": 0.0,
+                                      "presence_penalty": 0.0,
+                                      "logit_bias": {},
+                                      }
         self.prompt_tokens = 0
         self.completion_tokens = 0
         self.total_tokens = 0
 
     @retry(wait=wait_exponential(min=5, max=60), stop=stop_after_attempt(5))
-    def run(self, messages) :
+    def run(self, messages):
         if BASE_URL:
             client = openai.OpenAI(
                 api_key=OPENAI_API_KEY,
@@ -138,22 +145,20 @@ class OpenAIModel(ModelBackend):
             "gpt-4": 8192,
             "gpt-4-0613": 8192,
             "gpt-4-32k": 32768,
-            "gpt-4o": 4096, #100000
-            "gpt-4o-mini": 16384, #100000
+            "gpt-4o": 4096,  # 100000
+            "gpt-4o-mini": 16384,  # 100000
         }
-        response = client.chat.completions.create(messages = messages,
-        model = "gpt-3.5-turbo-16k",
-        temperature = 0.2,
-        top_p = 1.0,
-        n = 1,
-        stream = False,
-        frequency_penalty = 0.0,
-        presence_penalty = 0.0,
-        logit_bias = {},
-        ).model_dump()
+        response = client.chat.completions.create(messages=messages,
+                                                  model="gpt-3.5-turbo-16k",
+                                                  temperature=0.2,
+                                                  top_p=1.0,
+                                                  n=1,
+                                                  stream=False,
+                                                  frequency_penalty=0.0,
+                                                  presence_penalty=0.0,
+                                                  logit_bias={},
+                                                  ).model_dump()
         response_text = response['choices'][0]['message']['content']
-
-
 
         num_max_token = num_max_token_map[self.model_type]
         num_max_completion_tokens = num_max_token - num_prompt_tokens
@@ -165,16 +170,17 @@ class OpenAIModel(ModelBackend):
         self.prompt_tokens += response["usage"]["prompt_tokens"]
         self.completion_tokens += response["usage"]["completion_tokens"]
         self.total_tokens += response["usage"]["total_tokens"]
-        
+
         if not isinstance(response, Dict):
             raise RuntimeError("Unexpected return from OpenAI API")
         return response
 
-    
+
 def now():
     return time.strftime("%Y%m%d%H%M%S", time.localtime())
 
+
 def log_and_print_online(content=None):
-    if  content is not None:
+    if content is not None:
         print(content)
         logging.info(content)

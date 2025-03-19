@@ -8,6 +8,9 @@ import time
 
 self_api_key = os.environ.get('OPENAI_API_KEY')
 BASE_URL = os.environ.get('BASE_URL')
+DEFAULT_AI_MODEL = os.environ.get('DEFAULT_AI_MODEL')
+if not DEFAULT_AI_MODEL:
+    DEFAULT_AI_MODEL = "deepseek-r1-250120"
 
 if BASE_URL:
     client = openai.OpenAI(
@@ -58,7 +61,7 @@ def modal_trans(task_dsp):
                "'Just give me the most important keyword about this sentence without explaining it and your answer should be only one keyword."
         messages = [{"role": "user", "content": task_in}]
         response = client.chat.completions.create(messages=messages,
-        model="gpt-3.5-turbo-16k",
+        model=DEFAULT_AI_MODEL,
         temperature=0.2,
         top_p=1.0,
         n=1,
@@ -73,7 +76,7 @@ def modal_trans(task_dsp):
                "',Summarize this paragraph and return the key information."
         messages = [{"role": "user", "content": task_in}]
         response = client.chat.completions.create(messages=messages,
-        model="gpt-3.5-turbo-16k",
+        model=DEFAULT_AI_MODEL,
         temperature=0.2,
         top_p=1.0,
         n=1,

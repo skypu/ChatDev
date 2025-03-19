@@ -48,6 +48,8 @@ class ChatMessage(BaseMessage):
     content: str = ""
     refusal: str = None
     audio: object = None
+    reasoning_content: Optional[str] = None
+    annotations: Optional[Dict] = None
     if openai_new_api:
         function_call: Optional[FunctionCall] = None
         tool_calls: Optional[ChatCompletionMessageToolCall] = None
@@ -60,6 +62,9 @@ class ChatMessage(BaseMessage):
             role="user",
             content=self.content,
             refusal=self.refusal,
+            audio=self.audio,
+            reasoning_content=self.reasoning_content,
+            annotations=self.annotations,
         )
 
 
@@ -87,6 +92,8 @@ class AssistantChatMessage(ChatMessage):
     content: str = ""
     refusal: str = None
     audio: object = None
+    reasoning_content: Optional[str] = None
+    annotations: Optional[Dict] = None
 
 
 @dataclass
@@ -111,3 +118,5 @@ class UserChatMessage(ChatMessage):
     content: str = ""
     refusal: str = None
     audio: object = None
+    reasoning_content: Optional[str] = None
+    annotations: Optional[Dict] = None

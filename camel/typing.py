@@ -12,6 +12,10 @@
 # limitations under the License.
 # =========== Copyright 2023 @ CAMEL-AI.org. All Rights Reserved. ===========
 from enum import Enum
+import os
+DEFAULT_AI_MODEL = os.environ.get('DEFAULT_AI_MODEL')
+if not DEFAULT_AI_MODEL:
+    DEFAULT_AI_MODEL = "deepseek-r1-250120"
 
 
 class TaskType(Enum):
@@ -44,20 +48,21 @@ class RoleType(Enum):
 
 
 class ModelType(Enum):
-    GPT_3_5_TURBO = "gpt-3.5-turbo-16k-0613"
-    GPT_3_5_TURBO_NEW = "gpt-3.5-turbo-16k"
-    GPT_4 = "gpt-4"
-    GPT_4_32k = "gpt-4-32k"
-    GPT_4_TURBO = "gpt-4-turbo"
-    GPT_4_TURBO_V = "gpt-4-turbo"
-    GPT_4O = "gpt-4o"
-    GPT_4O_MINI = "gpt-4o-mini"
+    # GPT_3_5_TURBO = "gpt-3.5-turbo-16k-0613"
+    # GPT_3_5_TURBO_NEW = "gpt-3.5-turbo-16k"
+    # GPT_4 = "gpt-4"
+    # GPT_4_32k = "gpt-4-32k"
+    # GPT_4_TURBO = "gpt-4-turbo"
+    # GPT_4_TURBO_V = "gpt-4-turbo"
+    # GPT_4O = "gpt-4o"
+    # GPT_4O_MINI = "gpt-4o-mini"
+    DEFAULT_MODEL = DEFAULT_AI_MODEL
 
     STUB = "stub"
 
     @property
     def value_for_tiktoken(self):
-        return self.value if self.name != "STUB" else "gpt-3.5-turbo-16k-0613"
+        return self.value if self.name != "STUB" else DEFAULT_AI_MODEL
 
 
 class PhaseType(Enum):

@@ -83,14 +83,15 @@ def num_tokens_from_messages(
         encoding = tiktoken.get_encoding("cl100k_base")
 
     if model in {
-        ModelType.GPT_3_5_TURBO,
-        ModelType.GPT_3_5_TURBO_NEW,
-        ModelType.GPT_4,
-        ModelType.GPT_4_32k,
-        ModelType.GPT_4_TURBO,
-        ModelType.GPT_4_TURBO_V,
-        ModelType.GPT_4O,
-        ModelType.GPT_4O_MINI,
+        # ModelType.GPT_3_5_TURBO,
+        # ModelType.GPT_3_5_TURBO_NEW,
+        # ModelType.GPT_4,
+        # ModelType.GPT_4_32k,
+        # ModelType.GPT_4_TURBO,
+        # ModelType.GPT_4_TURBO_V,
+        # ModelType.GPT_4O,
+        # ModelType.GPT_4O_MINI,
+        ModelType.DEFAULT_MODEL,
         ModelType.STUB
     }:
         return count_tokens_openai_chat_models(messages, encoding)
@@ -114,22 +115,24 @@ def get_model_token_limit(model: ModelType) -> int:
     Returns:
         int: The maximum token limit for the given model.
     """
-    if model == ModelType.GPT_3_5_TURBO:
+    # if model == ModelType.GPT_3_5_TURBO:
+    #     return 16384
+    # elif model == ModelType.GPT_3_5_TURBO_NEW:
+    #     return 16384
+    # elif model == ModelType.GPT_4:
+    #     return 8192
+    # elif model == ModelType.GPT_4_32k:
+    #     return 32768
+    # elif model == ModelType.GPT_4_TURBO:
+    #     return 128000
+    # elif model == ModelType.STUB:
+    #     return 4096
+    # elif model == ModelType.GPT_4O:
+    #     return 128000
+    # elif model == ModelType.GPT_4O_MINI:
+    #     return 128000
+    if model == ModelType.DEFAULT_MODEL:
         return 16384
-    elif model == ModelType.GPT_3_5_TURBO_NEW:
-        return 16384
-    elif model == ModelType.GPT_4:
-        return 8192
-    elif model == ModelType.GPT_4_32k:
-        return 32768
-    elif model == ModelType.GPT_4_TURBO:
-        return 128000
-    elif model == ModelType.STUB:
-        return 4096
-    elif model == ModelType.GPT_4O:
-        return 128000
-    elif model == ModelType.GPT_4O_MINI:
-        return 128000
     else:
         raise ValueError("Unknown model type")
 

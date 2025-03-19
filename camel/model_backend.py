@@ -65,7 +65,8 @@ class OpenAIModel(ModelBackend):
 
     def run(self, *args, **kwargs):
         string = "\n".join([message["content"] for message in kwargs["messages"]])
-        encoding = tiktoken.encoding_for_model(self.model_type.value)
+        # encoding = tiktoken.encoding_for_model(self.model_type.value)
+        encoding = tiktoken.get_encoding("cl100k_base")  # Use an encoding compatible with OpenAI models
         num_prompt_tokens = len(encoding.encode(string))
         gap_between_send_receive = 15 * len(kwargs["messages"])
         num_prompt_tokens += gap_between_send_receive
@@ -83,16 +84,17 @@ class OpenAIModel(ModelBackend):
                 )
 
             num_max_token_map = {
-                "gpt-3.5-turbo": 4096,
-                "gpt-3.5-turbo-16k": 16384,
-                "gpt-3.5-turbo-0613": 4096,
-                "gpt-3.5-turbo-16k-0613": 16384,
-                "gpt-4": 8192,
-                "gpt-4-0613": 8192,
-                "gpt-4-32k": 32768,
-                "gpt-4-turbo": 100000,
-                "gpt-4o": 4096, #100000
-                "gpt-4o-mini": 16384, #100000
+                # "gpt-3.5-turbo": 4096,
+                # "gpt-3.5-turbo-16k": 16384,
+                # "gpt-3.5-turbo-0613": 4096,
+                # "gpt-3.5-turbo-16k-0613": 16384,
+                # "gpt-4": 8192,
+                # "gpt-4-0613": 8192,
+                # "gpt-4-32k": 32768,
+                # "gpt-4-turbo": 100000,
+                # "gpt-4o": 4096,  # 100000
+                # "gpt-4o-mini": 16384,  # 100000
+                "deepseek-r1-250120": 16384,
             }
             num_max_token = num_max_token_map[self.model_type.value]
             num_max_completion_tokens = num_max_token - num_prompt_tokens
@@ -116,16 +118,17 @@ class OpenAIModel(ModelBackend):
             return response
         else:
             num_max_token_map = {
-                "gpt-3.5-turbo": 4096,
-                "gpt-3.5-turbo-16k": 16384,
-                "gpt-3.5-turbo-0613": 4096,
-                "gpt-3.5-turbo-16k-0613": 16384,
-                "gpt-4": 8192,
-                "gpt-4-0613": 8192,
-                "gpt-4-32k": 32768,
-                "gpt-4-turbo": 100000,
-                "gpt-4o": 4096, #100000
-                "gpt-4o-mini": 16384, #100000
+                # "gpt-3.5-turbo": 4096,
+                # "gpt-3.5-turbo-16k": 16384,
+                # "gpt-3.5-turbo-0613": 4096,
+                # "gpt-3.5-turbo-16k-0613": 16384,
+                # "gpt-4": 8192,
+                # "gpt-4-0613": 8192,
+                # "gpt-4-32k": 32768,
+                # "gpt-4-turbo": 100000,
+                # "gpt-4o": 4096,  # 100000
+                # "gpt-4o-mini": 16384,  # 100000
+                "deepseek-r1-250120": 8192,
             }
             num_max_token = num_max_token_map[self.model_type.value]
             num_max_completion_tokens = num_max_token - num_prompt_tokens
@@ -177,17 +180,18 @@ class ModelFactory:
 
     @staticmethod
     def create(model_type: ModelType, model_config_dict: Dict) -> ModelBackend:
-        default_model_type = ModelType.GPT_3_5_TURBO
+        default_model_type = ModelType.DEFAULT_MODEL
 
         if model_type in {
-            ModelType.GPT_3_5_TURBO,
-            ModelType.GPT_3_5_TURBO_NEW,
-            ModelType.GPT_4,
-            ModelType.GPT_4_32k,
-            ModelType.GPT_4_TURBO,
-            ModelType.GPT_4_TURBO_V,
-            ModelType.GPT_4O,
-            ModelType.GPT_4O_MINI,
+            # ModelType.GPT_3_5_TURBO,
+            # ModelType.GPT_3_5_TURBO_NEW,
+            # ModelType.GPT_4,
+            # ModelType.GPT_4_32k,
+            # ModelType.GPT_4_TURBO,
+            # ModelType.GPT_4_TURBO_V,
+            # ModelType.GPT_4O,
+            # ModelType.GPT_4O_MINI,
+            ModelType.DEFAULT_MODEL,
             None
         }:
             model_class = OpenAIModel

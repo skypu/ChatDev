@@ -68,6 +68,12 @@ def get_config(company):
 
     return tuple(config_paths)
 
+print(f"""
+You should have done such things before running this script:
+$env:OPENAI_API_KEY="your_openai_api_key"
+$env:BASE_URL="https://ark.cn-beijing.volces.com/api/v3"
+$env:DEFAULT_AI_MODEL="deepseek-r1-250120"
+""")
 
 parser = argparse.ArgumentParser(description='argparse')
 parser.add_argument('--config', type=str, default="Default",
@@ -78,8 +84,8 @@ parser.add_argument('--task', type=str, default="Develop a basic Gomoku game.",
                     help="Prompt of software")
 parser.add_argument('--name', type=str, default="Gomoku",
                     help="Name of software, your software will be generated in WareHouse/name_org_timestamp")
-parser.add_argument('--model', type=str, default="GPT_3_5_TURBO",
-                    help="GPT Model, choose from {'GPT_3_5_TURBO', 'GPT_4', 'GPT_4_TURBO', 'GPT_4O', 'GPT_4O_MINI'}")
+parser.add_argument('--model', type=str, default="DEFAULT_MODEL",
+                    help="Any Model, choose from {'DEFAULT_MODEL', or you can add some models, try search DEFAULT_MODEL in the project and add your model}")
 parser.add_argument('--path', type=str, default="",
                     help="Your file directory, ChatDev will build upon your software in the Incremental mode")
 args = parser.parse_args()
@@ -90,16 +96,18 @@ args = parser.parse_args()
 #          Init ChatChain
 # ----------------------------------------
 config_path, config_phase_path, config_role_path = get_config(args.config)
-args2type = {'GPT_3_5_TURBO': ModelType.GPT_3_5_TURBO,
-             'GPT_4': ModelType.GPT_4,
-            #  'GPT_4_32K': ModelType.GPT_4_32k,
-             'GPT_4_TURBO': ModelType.GPT_4_TURBO,
-            #  'GPT_4_TURBO_V': ModelType.GPT_4_TURBO_V
-            'GPT_4O': ModelType.GPT_4O,
-            'GPT_4O_MINI': ModelType.GPT_4O_MINI,
-             }
+args2type = {
+    # 'GPT_3_5_TURBO': ModelType.GPT_3_5_TURBO,
+    # 'GPT_4': ModelType.GPT_4,
+    # #  'GPT_4_32K': ModelType.GPT_4_32k,
+    # 'GPT_4_TURBO': ModelType.GPT_4_TURBO,
+    # #  'GPT_4_TURBO_V': ModelType.GPT_4_TURBO_V
+    # 'GPT_4O': ModelType.GPT_4O,
+    # 'GPT_4O_MINI': ModelType.GPT_4O_MINI,
+    'DEFAULT_MODEL': ModelType.DEFAULT_MODEL,
+}
 if openai_new_api:
-    args2type['GPT_3_5_TURBO'] = ModelType.GPT_3_5_TURBO_NEW
+    args2type['DEFAULT_MODEL'] = ModelType.DEFAULT_MODEL
 
 chat_chain = ChatChain(config_path=config_path,
                        config_phase_path=config_phase_path,
