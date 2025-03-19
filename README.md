@@ -39,4 +39,17 @@ $env:DEFAULT_AI_MODEL="deepseek-r1-250120"
 python run.py --org "MyGreateCompany" --name "MyFirstProject" --task "I'd like to blablabla"(any idea you have)
 ```
 
+## 📖 about code changes
+model_backend.py:line 69; because the tiktoken module is designed for openai, deepseek models encoding methods are not included, so i set it to "cl100k_base"
+in other files i just commented all the gpt stuffs.
+
 if you have any problems, feel free to talk with me.
+
+## 🤝 Acknowledgments
+<a href="https://github.com/OpenBMB/ChatDev">ChatDev</a>&nbsp;&nbsp;
+<a href="http://nlp.csai.tsinghua.edu.cn/"><img src="misc/thunlp.png" height=50pt></a>&nbsp;&nbsp;
+<a href="https://modelbest.cn/"><img src="misc/modelbest.png" height=50pt></a>&nbsp;&nbsp;
+<a href="https://github.com/OpenBMB/AgentVerse/"><img src="misc/agentverse.png" height=50pt></a>&nbsp;&nbsp;
+<a href="https://github.com/OpenBMB/RepoAgent"><img src="misc/repoagent.png"  height=50pt></a>
+<a href="https://app.commanddash.io/agent?github=https://github.com/OpenBMB/ChatDev"><img src="misc/CommandDash.png" height=50pt></a>
+
