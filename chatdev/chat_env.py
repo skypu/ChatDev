@@ -15,13 +15,14 @@ from chatdev.roster import Roster
 from chatdev.utils import log_visualize
 from ecl.memory import Memory
 
-try:
-    from openai.types.chat.chat_completion_message_tool_call import ChatCompletionMessageToolCall
-    from openai.types.chat.chat_completion_message import FunctionCall
 
-    openai_new_api = True  # new openai api version
-except ImportError:
-    openai_new_api = False  # old openai api version
+# try:
+#     from openai.types.chat.chat_completion_message_tool_call import ChatCompletionMessageToolCall
+#     from openai.types.chat.chat_completion_message import FunctionCall
+#
+#     openai_new_api = True  # new openai api version
+# except ImportError:
+#     openai_new_api = False  # old openai api version
 
 
 class ChatEnvConfig:
@@ -36,7 +37,7 @@ class ChatEnvConfig:
         self.git_management = git_management  # Whether to use git to manage the creation and changes of generated software
         self.incremental_develop = incremental_develop  # Whether to use incremental develop on an existing project
         self.background_prompt = background_prompt  # background prompt that will be added to every inquiry to LLM
-        self.with_memory = with_memory # Wheter to use memroy in the interaction between agents
+        self.with_memory = with_memory  # Wheter to use memroy in the interaction between agents
 
     def __str__(self):
         string = ""
@@ -62,7 +63,7 @@ class ChatEnv:
         self.env_dict = {
             "directory": "",
             "task_prompt": "",
-            "task_description":"",
+            "task_description": "",
             "modality": "",
             "ideas": "",
             "language": "",
@@ -96,10 +97,10 @@ class ChatEnv:
             print("{} Created".format(directory))
         else:
             os.mkdir(self.env_dict['directory'])
-    
+
     def init_memory(self):
         self.memory.id_enabled = True
-        self.memory.directory = os.path.join(os.getcwd(),"ecl","memory")
+        self.memory.directory = os.path.join(os.getcwd(), "ecl", "memory")
         if not os.path.exists(self.memory.directory):
             os.mkdir(self.memory.directory)
         self.memory.upload()
@@ -239,20 +240,26 @@ class ChatEnv:
                 if desc.endswith(".png"):
                     desc = desc.replace(".png", "")
                 print("{}: {}".format(filename, desc))
-                if openai_new_api:
-                    response = openai.images.generate(
-                        prompt=desc,
-                        n=1,
-                        size="256x256"
-                    )
-                    image_url = response.data[0].url
-                else:
-                    response = openai.Image.create(
-                        prompt=desc,
-                        n=1,
-                        size="256x256"
-                    )
-                    image_url = response['data'][0]['url']
+                response = openai.images.generate(
+                    prompt=desc,
+                    n=1,
+                    size="256x256"
+                )
+                image_url = response.data[0].url
+                # if openai_new_api:
+                #     response = openai.images.generate(
+                #         prompt=desc,
+                #         n=1,
+                #         size="256x256"
+                #     )
+                #     image_url = response.data[0].url
+                # else:
+                #     response = openai.Image.create(
+                #         prompt=desc,
+                #         n=1,
+                #         size="256x256"
+                #     )
+                #     image_url = response['data'][0]['url']
                 download(image_url, filename)
 
     def get_proposed_images_from_message(self, messages):
@@ -289,21 +296,26 @@ class ChatEnv:
                 if desc.endswith(".png"):
                     desc = desc.replace(".png", "")
                 print("{}: {}".format(filename, desc))
-
-                if openai_new_api:
-                    response = openai.images.generate(
-                        prompt=desc,
-                        n=1,
-                        size="256x256"
-                    )
-                    image_url = response.data[0].url
-                else:
-                    response = openai.Image.create(
-                        prompt=desc,
-                        n=1,
-                        size="256x256"
-                    )
-                    image_url = response['data'][0]['url']
+                response = openai.images.generate(
+                    prompt=desc,
+                    n=1,
+                    size="256x256"
+                )
+                image_url = response.data[0].url
+                # if openai_new_api:
+                #     response = openai.images.generate(
+                #         prompt=desc,
+                #         n=1,
+                #         size="256x256"
+                #     )
+                #     image_url = response.data[0].url
+                # else:
+                #     response = openai.Image.create(
+                #         prompt=desc,
+                #         n=1,
+                #         size="256x256"
+                #     )
+                #     image_url = response['data'][0]['url']
 
                 download(image_url, filename)
 

@@ -14,16 +14,20 @@
 from dataclasses import dataclass
 from typing import Dict, Optional
 
+from openai.types.chat.chat_completion_message import FunctionCall
+from openai.types.chat.chat_completion_message_tool_call import ChatCompletionMessageToolCall
+
 from camel.messages import BaseMessage
 from camel.typing import RoleType
 
-try:
-    from openai.types.chat.chat_completion_message_tool_call import ChatCompletionMessageToolCall
-    from openai.types.chat.chat_completion_message import FunctionCall
 
-    openai_new_api = True  # new openai api version
-except ImportError:
-    openai_new_api = False  # old openai api version
+# try:
+#     from openai.types.chat.chat_completion_message_tool_call import ChatCompletionMessageToolCall
+#     from openai.types.chat.chat_completion_message import FunctionCall
+#
+#     openai_new_api = True  # new openai api version
+# except ImportError:
+#     openai_new_api = False  # old openai api version
 
 
 @dataclass
@@ -50,9 +54,12 @@ class ChatMessage(BaseMessage):
     audio: object = None
     reasoning_content: Optional[str] = None
     annotations: Optional[Dict] = None
-    if openai_new_api:
-        function_call: Optional[FunctionCall] = None
-        tool_calls: Optional[ChatCompletionMessageToolCall] = None
+    function_call: Optional[FunctionCall] = None
+    tool_calls: Optional[ChatCompletionMessageToolCall] = None
+
+    # if openai_new_api:
+    #     function_call: Optional[FunctionCall] = None
+    #     tool_calls: Optional[ChatCompletionMessageToolCall] = None
 
     def set_user_role_at_backend(self: BaseMessage):
         return self.__class__(

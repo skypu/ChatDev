@@ -23,17 +23,18 @@ sys.path.append(root)
 
 from chatdev.chat_chain import ChatChain
 
-try:
-    from openai.types.chat.chat_completion_message_tool_call import ChatCompletionMessageToolCall
-    from openai.types.chat.chat_completion_message import FunctionCall
 
-    openai_new_api = True  # new openai api version
-except ImportError:
-    openai_new_api = False  # old openai api version
-    print(
-        "Warning: Your OpenAI version is outdated. \n "
-        "Please update as specified in requirement.txt. \n "
-        "The old API interface is deprecated and will no longer be supported.")
+# try:
+#     from openai.types.chat.chat_completion_message_tool_call import ChatCompletionMessageToolCall
+#     from openai.types.chat.chat_completion_message import FunctionCall
+#
+#     openai_new_api = True  # new openai api version
+# except ImportError:
+#     openai_new_api = False  # old openai api version
+#     print(
+#         "Warning: Your OpenAI version is outdated. \n "
+#         "Please update as specified in requirement.txt. \n "
+#         "The old API interface is deprecated and will no longer be supported.")
 
 
 def get_config(company):
@@ -67,6 +68,7 @@ def get_config(company):
             config_paths.append(default_config_path)
 
     return tuple(config_paths)
+
 
 print(f"""
 ################################################################
@@ -123,8 +125,8 @@ args2type = {
     # 'GPT_4O_MINI': ModelType.GPT_4O_MINI,
     'DEFAULT_MODEL': ModelType.DEFAULT_MODEL,
 }
-if openai_new_api:
-    args2type['DEFAULT_MODEL'] = ModelType.DEFAULT_MODEL
+# if openai_new_api:
+#     args2type['DEFAULT_MODEL'] = ModelType.DEFAULT_MODEL
 
 chat_chain = ChatChain(config_path=config_path,
                        config_phase_path=config_phase_path,

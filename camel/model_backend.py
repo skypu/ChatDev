@@ -11,6 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 # =========== Copyright 2023 @ CAMEL-AI.org. All Rights Reserved. ===========
+import os
 import time
 from abc import ABC, abstractmethod
 from typing import Any, Dict
@@ -18,19 +19,18 @@ from typing import Any, Dict
 import openai
 import requests
 import tiktoken
+from openai.types.chat import ChatCompletion, ChatCompletionMessage
 
 from camel.typing import ModelType
 from chatdev.statistics import prompt_cost, DEFAULT_AI_MODEL
 from chatdev.utils import log_visualize
 
-try:
-    from openai.types.chat import ChatCompletion, ChatCompletionMessage
-
-    openai_new_api = True  # new openai api version
-except ImportError:
-    openai_new_api = False  # old openai api version
-
-import os
+# try:
+#     from openai.types.chat import ChatCompletion, ChatCompletionMessage
+#
+#     openai_new_api = True  # new openai api version
+# except ImportError:
+#     openai_new_api = False  # old openai api version
 
 OPENAI_API_KEY = os.environ['OPENAI_API_KEY']
 if 'BASE_URL' in os.environ:
@@ -79,104 +79,56 @@ class OpenAIModel(ModelBackend):
         gap_between_send_receive = 15 * len(kwargs["messages"])
         num_prompt_tokens += gap_between_send_receive
 
-        if openai_new_api:
-            # Experimental, add base_url
-            if BASE_URL:
-                client = openai.OpenAI(
-                    api_key=OPENAI_API_KEY,
-                    base_url=BASE_URL,
-                )
-            else:
-                client = openai.OpenAI(
-                    api_key=OPENAI_API_KEY
-                )
+        client = openai.OpenAI(
+            api_key=OPENAI_API_KEY,
+            base_url=BASE_URL,
+        )
 
-            num_max_token_map = {
-                # "gpt-3.5-turbo": 4096,
-                # "gpt-3.5-turbo-16k": 16384,
-                # "gpt-3.5-turbo-0613": 4096,
-                # "gpt-3.5-turbo-16k-0613": 16384,
-                # "gpt-4": 8192,
-                # "gpt-4-0613": 8192,
-                # "gpt-4-32k": 32768,
-                # "gpt-4-turbo": 100000,
-                # "gpt-4o": 4096,  # 100000
-                # "gpt-4o-mini": 16384,  # 100000
-                "deepseek-r1-250120": 16384,
-            }
-            num_max_token = num_max_token_map[
-                self.model_type.value] if self.model_type.value in num_max_token_map else 4096
-            num_max_completion_tokens = num_max_token - num_prompt_tokens
-            self.model_config_dict['max_tokens'] = num_max_completion_tokens
+        num_max_token_map = {
+            # "gpt-3.5-turbo": 4096,
+            # "gpt-3.5-turbo-16k": 16384,
+            # "gpt-3.5-turbo-0613": 4096,
+            # "gpt-3.5-turbo-16k-0613": 16384,
+            # "gpt-4": 8192,
+            # "gpt-4-0613": 8192,
+            # "gpt-4-32k": 32768,
+            # "gpt-4-turbo": 100000,
+            # "gpt-4o": 4096,  # 100000
+            # "gpt-4o-mini": 16384,  # 100000
+            "deepseek-r1-250120": 16384,
+        }
+        num_max_token = num_max_token_map[
+            self.model_type.value] if self.model_type.value in num_max_token_map else 4096
+        num_max_completion_tokens = num_max_token - num_prompt_tokens
+        self.model_config_dict['max_tokens'] = num_max_completion_tokens
 
-            if AI_PROVIDER == "openai":
-                response = client.chat.completions.create(*args, **kwargs, model=self.model_type.value,
-                                                          **self.model_config_dict)
-            else:
-                # print(call_ai(model=DEFAULT_AI_MODEL, messages=[{"role": "user", "content": "Hello!"}]))
-                response = call_ollama(*args, **kwargs)
-
-            num_prompt_tokens = response.usage.prompt_tokens
-            num_completion_tokens = response.usage.completion_tokens
-
-            cost = prompt_cost(
-                self.model_type.value,
-                num_prompt_tokens=num_prompt_tokens,
-                # num_prompt_tokens=response.get("usage", {}).get("prompt_tokens", 1),
-                num_completion_tokens=num_completion_tokens
-                # num_completion_tokens=response.get("usage", {}).get("completion_tokens", 2)
-            )
-
-            log_visualize(
-                "**[{} Usage_Info Receive]**\nprompt_tokens: {}\ncompletion_tokens: {}\ntotal_tokens: {}\ncost: ${:.6f}\n".format(
-                    BASE_URL,
-                    num_prompt_tokens,
-                    num_completion_tokens,
-                    num_prompt_tokens + num_completion_tokens, cost))
-            if not isinstance(response, ChatCompletion):
-                raise RuntimeError("Unexpected return from OpenAI API")
-            return response
+        if AI_PROVIDER == "openai":
+            response = client.chat.completions.create(*args, **kwargs, model=self.model_type.value,
+                                                      **self.model_config_dict)
         else:
-            raise RuntimeError
-            # num_max_token_map = {
-            #     # "gpt-3.5-turbo": 4096,
-            #     # "gpt-3.5-turbo-16k": 16384,
-            #     # "gpt-3.5-turbo-0613": 4096,
-            #     # "gpt-3.5-turbo-16k-0613": 16384,
-            #     # "gpt-4": 8192,
-            #     # "gpt-4-0613": 8192,
-            #     # "gpt-4-32k": 32768,
-            #     # "gpt-4-turbo": 100000,
-            #     # "gpt-4o": 4096,  # 100000
-            #     # "gpt-4o-mini": 16384,  # 100000
-            #     "deepseek-r1-250120": 8192,
-            # }
-            # num_max_token = num_max_token_map[
-            #     self.model_type.value] if self.model_type.value in num_max_token_map else 4096
-            # num_max_completion_tokens = num_max_token - num_prompt_tokens
-            # self.model_config_dict['max_tokens'] = num_max_completion_tokens
-            #
-            # if AI_PROVIDER == "openai":
-            #     response = openai.ChatCompletion.create(*args, **kwargs, model=self.model_type.value,
-            #                                             **self.model_config_dict)
-            # else:
-            #     # print(call_ai(model=DEFAULT_AI_MODEL, messages=[{"role": "user", "content": "Hello!"}]))
-            #     response = call_ollama(*args, **kwargs, self.model_type.value, **self.model_config_dict)
-            #
-            # cost = prompt_cost(
-            #     self.model_type.value,
-            #     num_prompt_tokens=response["usage"]["prompt_tokens"],
-            #     num_completion_tokens=response["usage"]["completion_tokens"]
-            # )
-            #
-            # log_visualize(
-            #     "**[{} Usage_Info Receive]**\nprompt_tokens: {}\ncompletion_tokens: {}\ntotal_tokens: {}\ncost: ${:.6f}\n".format(
-            #         BASE_URL,
-            #         response["usage"]["prompt_tokens"], response["usage"]["completion_tokens"],
-            #         response["usage"]["total_tokens"], cost))
-            # if not isinstance(response, Dict):
-            #     raise RuntimeError("Unexpected return from OpenAI API")
-            # return response
+            # print(call_ai(model=DEFAULT_AI_MODEL, messages=[{"role": "user", "content": "Hello!"}]))
+            response = call_ollama(*args, **kwargs)
+
+        num_prompt_tokens = response.usage.prompt_tokens
+        num_completion_tokens = response.usage.completion_tokens
+
+        cost = prompt_cost(
+            self.model_type.value,
+            num_prompt_tokens=num_prompt_tokens,
+            # num_prompt_tokens=response.get("usage", {}).get("prompt_tokens", 1),
+            num_completion_tokens=num_completion_tokens
+            # num_completion_tokens=response.get("usage", {}).get("completion_tokens", 2)
+        )
+
+        log_visualize(
+            "**[{} Usage_Info Receive]**\nprompt_tokens: {}\ncompletion_tokens: {}\ntotal_tokens: {}\ncost: ${:.6f}\n".format(
+                BASE_URL,
+                num_prompt_tokens,
+                num_completion_tokens,
+                num_prompt_tokens + num_completion_tokens, cost))
+        if not isinstance(response, ChatCompletion):
+            raise RuntimeError("Unexpected return from OpenAI API")
+        return response
 
 
 class StubModel(ModelBackend):

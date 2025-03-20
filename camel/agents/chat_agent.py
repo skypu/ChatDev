@@ -14,6 +14,7 @@
 from dataclasses import dataclass
 from typing import Any, Dict, List, Optional
 
+from openai.types.chat import ChatCompletion
 from tenacity import retry
 from tenacity.stop import stop_after_attempt
 from tenacity.wait import wait_exponential
@@ -29,12 +30,14 @@ from camel.utils import (
     openai_api_key_required,
 )
 from chatdev.utils import log_visualize
-try:
-    from openai.types.chat import ChatCompletion
 
-    openai_new_api = True  # new openai api version
-except ImportError:
-    openai_new_api = False  # old openai api version
+
+# try:
+#     from openai.types.chat import ChatCompletion
+#
+#     openai_new_api = True  # new openai api version
+# except ImportError:
+#     openai_new_api = False  # old openai api version
 
 
 @dataclass(frozen=True)
@@ -87,7 +90,7 @@ class ChatAgent(BaseAgent):
     def __init__(
             self,
             system_message: SystemMessage,
-            memory = None,
+            memory=None,
             model: Optional[ModelType] = None,
             model_config: Optional[Any] = None,
             message_window_size: Optional[int] = None,
@@ -104,7 +107,7 @@ class ChatAgent(BaseAgent):
         self.terminated: bool = False
         self.info: bool = False
         self.init_messages()
-        if memory !=None and self.role_name in["Code Reviewer","Programmer","Software Test Engineer"]:
+        if memory != None and self.role_name in ["Code Reviewer", "Programmer", "Software Test Engineer"]:
             self.memory = memory.memory_data.get("All")
         else:
             self.memory = None
@@ -165,39 +168,40 @@ class ChatAgent(BaseAgent):
         """
         self.stored_messages.append(message)
         return self.stored_messages
-    def use_memory(self,input_message) -> List[MessageType]:
-        if self.memory is None :
+
+    def use_memory(self, input_message) -> List[MessageType]:
+        if self.memory is None:
             return None
         else:
             if self.role_name == "Programmer":
-                result = self.memory.memory_retrieval(input_message,"code")
+                result = self.memory.memory_retrieval(input_message, "code")
                 if result != None:
-                    target_memory,distances, mids,task_list,task_dir_list = result
+                    target_memory, distances, mids, task_list, task_dir_list = result
                     if target_memory != None and len(target_memory) != 0:
-                        target_memory="".join(target_memory)
-                        #self.stored_messages[-1].content = self.stored_messages[-1].content+"Here is some code you've previously completed:"+target_memory+"You can refer to the previous script to complement this task."
+                        target_memory = "".join(target_memory)
+                        # self.stored_messages[-1].content = self.stored_messages[-1].content+"Here is some code you've previously completed:"+target_memory+"You can refer to the previous script to complement this task."
                         log_visualize(self.role_name,
-                                            "thinking back and found some related code: \n--------------------------\n"
-                                            + target_memory)
+                                      "thinking back and found some related code: \n--------------------------\n"
+                                      + target_memory)
                 else:
                     target_memory = None
                     log_visualize(self.role_name,
-                                         "thinking back but find nothing useful")
+                                  "thinking back but find nothing useful")
 
             else:
                 result = self.memory.memory_retrieval(input_message, "text")
                 if result != None:
                     target_memory, distances, mids, task_list, task_dir_list = result
                     if target_memory != None and len(target_memory) != 0:
-                        target_memory=";".join(target_memory)
-                        #self.stored_messages[-1].content = self.stored_messages[-1].content+"Here are some effective and efficient instructions you have sent to the assistant :"+target_memory+"You can refer to these previous excellent instructions to better instruct assistant here."
+                        target_memory = ";".join(target_memory)
+                        # self.stored_messages[-1].content = self.stored_messages[-1].content+"Here are some effective and efficient instructions you have sent to the assistant :"+target_memory+"You can refer to these previous excellent instructions to better instruct assistant here."
                         log_visualize(self.role_name,
-                                            "thinking back and found some related text: \n--------------------------\n"
-                                            + target_memory)
+                                      "thinking back and found some related text: \n--------------------------\n"
+                                      + target_memory)
                 else:
                     target_memory = None
                     log_visualize(self.role_name,
-                                         "thinking back but find nothing useful")
+                                  "thinking back but find nothing useful")
 
         return target_memory
 
@@ -237,34 +241,47 @@ class ChatAgent(BaseAgent):
 
         if num_tokens < self.model_token_limit:
             response = self.model_backend.run(messages=openai_messages)
-            if openai_new_api:
-                if not isinstance(response, ChatCompletion):
-                    raise RuntimeError("OpenAI returned unexpected struct")
-                output_messages = [
-                    ChatMessage(role_name=self.role_name, role_type=self.role_type,
-                                meta_dict=dict(), **dict(choice.message))
-                    for choice in response.choices
-                ]
-                info = self.get_info(
-                    response.id,
-                    response.usage,
-                    [str(choice.finish_reason) for choice in response.choices],
-                    num_tokens,
-                )
-            else:
-                if not isinstance(response, dict):
-                    raise RuntimeError("OpenAI returned unexpected struct")
-                output_messages = [
-                    ChatMessage(role_name=self.role_name, role_type=self.role_type,
-                                meta_dict=dict(), **dict(choice["message"]))
-                    for choice in response["choices"]
-                ]
-                info = self.get_info(
-                    response["id"],
-                    response["usage"],
-                    [str(choice["finish_reason"]) for choice in response["choices"]],
-                    num_tokens,
-                )
+            if not isinstance(response, ChatCompletion):
+                raise RuntimeError("OpenAI returned unexpected struct")
+            output_messages = [
+                ChatMessage(role_name=self.role_name, role_type=self.role_type,
+                            meta_dict=dict(), **dict(choice.message))
+                for choice in response.choices
+            ]
+            info = self.get_info(
+                response.id,
+                response.usage,
+                [str(choice.finish_reason) for choice in response.choices],
+                num_tokens,
+            )
+            # if openai_new_api:
+            #     if not isinstance(response, ChatCompletion):
+            #         raise RuntimeError("OpenAI returned unexpected struct")
+            #     output_messages = [
+            #         ChatMessage(role_name=self.role_name, role_type=self.role_type,
+            #                     meta_dict=dict(), **dict(choice.message))
+            #         for choice in response.choices
+            #     ]
+            #     info = self.get_info(
+            #         response.id,
+            #         response.usage,
+            #         [str(choice.finish_reason) for choice in response.choices],
+            #         num_tokens,
+            #     )
+            # else:
+            #     if not isinstance(response, dict):
+            #         raise RuntimeError("OpenAI returned unexpected struct")
+            #     output_messages = [
+            #         ChatMessage(role_name=self.role_name, role_type=self.role_type,
+            #                     meta_dict=dict(), **dict(choice["message"]))
+            #         for choice in response["choices"]
+            #     ]
+            #     info = self.get_info(
+            #         response["id"],
+            #         response["usage"],
+            #         [str(choice["finish_reason"]) for choice in response["choices"]],
+            #         num_tokens,
+            #     )
 
             # TODO strict <INFO> check, only in the beginning of the line
             # if "<INFO>" in output_messages[0].content:
