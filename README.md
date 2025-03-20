@@ -5,8 +5,8 @@
 </p>
 
 All my thanks to chatdev
-but as we all unknow, most simplified-chinese users are not able to use openai apis
-so i made a little change to the codes, using volces（火山） apis as a demo
+i made almost the least change to the codes, this version allows you to use any online-openai-style-api, besides, your local ollama is supported, too.
+part of the codes are still a mass, i'd pay some time to reconstruct it(when i'm not lazy though)
 
 # 🖥️ all you need to do is
 
@@ -36,7 +36,7 @@ $env:AI_PROVIDER="openai"
 ```
 alternatively, you could just use your local ollama with any model you've installed, all calls are free
 ```
-$env:OPENAI_API_KEY="not needed"
+$env:OPENAI_API_KEY="not needed, but keep it"
 $env:BASE_URL="http://localhost:11434/api/generate"
 $env:DEFAULT_AI_MODEL="gemma3:latest"
 $env:AI_PROVIDER="ollama"
