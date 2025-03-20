@@ -22,7 +22,7 @@ import tiktoken
 from openai.types.chat import ChatCompletion, ChatCompletionMessage
 
 from camel.typing import ModelType
-from chatdev.statistics import prompt_cost, DEFAULT_AI_MODEL
+from chatdev.statistics import prompt_cost
 from chatdev.utils import log_visualize
 
 # try:
@@ -106,11 +106,10 @@ class OpenAIModel(ModelBackend):
             response = client.chat.completions.create(*args, **kwargs, model=self.model_type.value,
                                                       **self.model_config_dict)
         else:
-            # print(call_ai(model=DEFAULT_AI_MODEL, messages=[{"role": "user", "content": "Hello!"}]))
-            response = call_ollama(*args, **kwargs)
+            response = OllamaChatCompletion.create(*args, **kwargs)
 
-        num_prompt_tokens = response.usage.prompt_tokens
-        num_completion_tokens = response.usage.completion_tokens
+        num_prompt_tokens = response.usage.prompt_tokens if response.usage else 0
+        num_completion_tokens = response.usage.completion_tokens if response.usage else 0
 
         cost = prompt_cost(
             self.model_type.value,
@@ -187,66 +186,42 @@ class ModelFactory:
         return inst
 
 
-from pydantic import BaseModel  # Ensure compatibility with Pydantic
+class OllamaChatCompletion(ChatCompletion):
+    @classmethod
+    def create(cls, *args, **kwargs):
+        """Mimics OpenAI's client.chat.completions.create but calls Ollama locally"""
+        model_name = kwargs.get("model", DEFAULT_AI_MODEL)
+        prompt = kwargs.get("messages", [{"role": "user", "content": "Hello!"}])[-1]["content"]
 
+        # Construct Ollama request payload
+        payload = {
+            "model": model_name,
+            "prompt": prompt,
+            "stream": False  # Adjust if streaming is needed
+        }
 
-class OllamaChatCompletion(ChatCompletion, BaseModel):
-    """A wrapper to make Ollama responses behave like OpenAI's ChatCompletion."""
+        try:
+            response = requests.post(BASE_URL, json=payload)
+            response.raise_for_status()
+        except requests.RequestException as e:
+            raise RuntimeError(f"Ollama request failed: {e}")
 
-    id: str
-    object: str
-    created: int
-    model: str
-    usage: dict
-    choices: list
+        ollama_response = response.json()
 
-    def __init__(self, response, model_name):
-        super().__init__(  # ✅ Properly initialize the Pydantic model
-            id="ollama-123",
+        # Convert Ollama response to OpenAI ChatCompletion format
+        return cls(
+            id=ollama_response.get("id", "chatcmpl-ollama"),
             object="chat.completion",
             created=int(time.time()),
             model=model_name,
-            usage={
-                "prompt_tokens": 1,  # Ollama does not provide token usage
-                "completion_tokens": 2,
-                "total_tokens": 3
-            },
             choices=[
                 {
                     "message": ChatCompletionMessage(  # ✅ Convert to an OpenAI-style object
                         role="assistant",
-                        content=response.get("response", "No response")
+                        content=ollama_response.get("response", "No response")
                     ),
                     "finish_reason": "stop",
                     "index": 0
                 }
             ]
         )
-
-    # ✅ Override __getitem__ to mimic a dictionary
-    def __getitem__(self, key):
-        return getattr(self, key, None)
-
-    def get(self, key, default=None):
-        """Mimic dictionary get() behavior"""
-        return getattr(self, key, default)
-
-
-def call_ollama(*args, **kwargs):
-    model_name = kwargs.get("model", DEFAULT_AI_MODEL)
-    prompt = kwargs.get("messages", [{"role": "user", "content": "Hello!"}])[-1]["content"]
-
-    payload = {
-        "model": model_name,
-        "prompt": prompt,
-        "stream": False
-    }
-
-    response = requests.post(BASE_URL, json=payload)
-
-    try:
-        ollama_response = response.json()
-        return OllamaChatCompletion(ollama_response, model_name)  # ✅ Return a structured OpenAI-style object
-    except Exception as e:
-        print("JSON Decode Error:", e)
-        return OllamaChatCompletion({"response": "Error processing request"}, model_name)
